@@ -274,7 +274,7 @@ def add_code_block(doc, lines: list):
 # ═══════════════════════════════════════════════════════════════
 def setup_header_footer(section, project_title: str):
     """
-    Header: project title centered with a bottom border line — clean, NOT faded.
+    Header: Empty.
     Footer: page number centered.
     """
     # ── HEADER
@@ -286,24 +286,6 @@ def setup_header_footer(section, project_title: str):
         hp = header.add_paragraph()
 
     hp.clear()
-    hp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    hrun = hp.add_run(project_title.upper())
-    hrun.font.name  = "Times New Roman"
-    hrun.font.size  = Pt(11)
-    hrun.font.bold  = False
-    hrun.font.color.rgb = RGBColor(0x00, 0x00, 0x00)  # BLACK (not grey/faded)
-    _force_times_new_roman(hrun)
-
-    # Bottom border under header text
-    pPr = hp._p.get_or_add_pPr()
-    pBdr = OxmlElement("w:pBdr")
-    bottom = OxmlElement("w:bottom")
-    bottom.set(qn("w:val"),   "single")
-    bottom.set(qn("w:sz"),    "6")
-    bottom.set(qn("w:space"), "1")
-    bottom.set(qn("w:color"), "000000")
-    pBdr.append(bottom)
-    pPr.append(pBdr)
 
     # ── FOOTER with page number field
     footer = section.footer
@@ -628,7 +610,6 @@ class DocumentFormatterAgentV2:
 
             # Chapter heading
             if btype == "chapter":
-                doc.add_page_break()
                 add_chapter_heading(doc, f"CHAPTER {block['num']}")
                 add_chapter_heading(doc, block["text"])
                 doc.add_paragraph()
