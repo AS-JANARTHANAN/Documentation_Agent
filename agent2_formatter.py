@@ -612,16 +612,13 @@ class DocumentFormatterAgentV2:
             if btype == "chapter":
                 add_chapter_heading(doc, f"CHAPTER {block['num']}")
                 add_chapter_heading(doc, block["text"])
-                doc.add_paragraph()
 
             # Main subheading (1.1, 2.1, etc.)
             elif btype == "subheading":
-                doc.add_paragraph()
                 add_subheading(doc, block["text"])
 
             # Sub-subheading (3.1.1, 3.2.1, etc.)
             elif btype == "subheading_sub":
-                doc.add_paragraph()
                 add_subsub_heading(doc, block["text"])
 
             # Body paragraph
@@ -643,7 +640,6 @@ class DocumentFormatterAgentV2:
             elif btype == "references_start":
                 doc.add_page_break()
                 add_chapter_heading(doc, "REFERENCES")
-                doc.add_paragraph()
                 in_references = True
 
             elif btype == "reference":

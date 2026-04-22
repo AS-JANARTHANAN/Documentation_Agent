@@ -404,7 +404,13 @@ async function runAgent2(){
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify(payload)
   });
-  if(!res.ok){ log('a2-log','Failed to start formatter','err'); btn.disabled=false; btn.textContent='Format to .docx'; return; }
+  if(!res.ok){ 
+    const errData = await res.json().catch(()=>({error: 'Failed to start formatter'}));
+    log('a2-log', errData.error || 'Failed to start formatter', 'err'); 
+    btn.disabled=false; 
+    btn.textContent='Format to .docx'; 
+    return; 
+  }
 
   const evtSource = new EventSource(`/api/stream/${session}`);
   evtSource.onmessage = (e) => {
