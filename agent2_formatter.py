@@ -584,17 +584,10 @@ class DocumentFormatterAgentV2:
 
         doc = Document()
 
-        # ── Front matter
-        print("[Agent 2 v2] Building cover page...")
-        self.build_cover_page(doc, project_title, degree, department,
-                              student_name, roll_no, college, guide, year)
-
-        print("[Agent 2 v2] Building certificate page...")
-        self.build_certificate(doc, project_title, student_name, roll_no,
-                                college, department, guide, hod)
-
-        print("[Agent 2 v2] Building declaration page...")
-        self.build_declaration(doc)
+        # Initialize document layout
+        section = doc.sections[0]
+        set_margins(section)
+        setup_header_footer(section, project_title)
 
         # ── Render content blocks
         print("[Agent 2 v2] Rendering chapters...")
