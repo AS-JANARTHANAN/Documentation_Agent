@@ -369,21 +369,21 @@ def parse_tagged_content(raw_text: str) -> list:
         if m:
             flush_content()
             blocks.append({"type": "chapter", "num": m.group(1).strip(),
-                            "text": m.group(2).strip()})
+                            "text": m.group(2).strip().replace('_', ' ')})
             i += 1; continue
 
         # ── Sub-subheading (3.1.1 etc.) — check before subheading
         m = re.match(r"\[SUBHEADING_SUB:\s*(.+?)\]", line, re.I)
         if m:
             flush_content()
-            blocks.append({"type": "subheading_sub", "text": m.group(1).strip()})
+            blocks.append({"type": "subheading_sub", "text": m.group(1).strip().replace('_', ' ')})
             i += 1; continue
 
         # ── Subheading
         m = re.match(r"\[SUBHEADING:\s*(.+?)\]", line, re.I)
         if m:
             flush_content()
-            blocks.append({"type": "subheading", "text": m.group(1).strip()})
+            blocks.append({"type": "subheading", "text": m.group(1).strip().replace('_', ' ')})
             i += 1; continue
 
         # ── Content tag
