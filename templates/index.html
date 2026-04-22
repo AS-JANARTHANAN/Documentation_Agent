@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DocAgent — AI Project Documentation Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0d0f1a;--card:#141726;--card2:#1a1f35;--border:#252a45;
+  --accent:#6c63ff;--accent2:#a78bfa;--green:#22d3a5;--red:#f87171;
+  --text:#e2e8f0;--muted:#64748b;--input:#1e2440;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#1a1f35,#0d0f1a);border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;gap:14px;}
+.logo{width:42px;height:42px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+header h1{font-size:1.3rem;font-weight:700;background:linear-gradient(90deg,#e2e8f0,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+header p{font-size:.78rem;color:var(--muted);margin-top:2px;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-left:auto;box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* TABS */
+.tabs{display:flex;gap:0;padding:24px 32px 0;border-bottom:1px solid var(--border);}
+.tab{padding:10px 24px;border-radius:10px 10px 0 0;cursor:pointer;font-size:.88rem;font-weight:500;color:var(--muted);border:1px solid transparent;border-bottom:none;transition:.2s;}
+.tab.active{color:var(--text);background:var(--card);border-color:var(--border);}
+
+/* LAYOUT */
+.container{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:28px 32px;max-width:1400px;}
+@media(max-width:900px){.container{grid-template-columns:1fr;}}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.card-title{font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+
+/* FORM */
+.form-group{margin-bottom:16px;}
+label{display:block;font-size:.8rem;font-weight:500;color:var(--muted);margin-bottom:6px;}
+input,select,textarea{width:100%;background:var(--input);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px 14px;font-size:.88rem;font-family:'Inter',sans-serif;outline:none;transition:.2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.15);}
+select option{background:var(--input);}
+textarea{resize:vertical;min-height:80px;}
+
+/* RADIO PILLS */
+.pills{display:flex;gap:8px;flex-wrap:wrap;}
+.pill{cursor:pointer;}
+.pill input{display:none;}
+.pill span{display:inline-block;padding:7px 18px;border-radius:99px;border:1px solid var(--border);font-size:.82rem;color:var(--muted);transition:.2s;}
+.pill input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* BTN */
+.btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;transition:.2s;margin-top:8px;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-green{background:linear-gradient(135deg,#059669,var(--green));color:#fff;}
+.btn-green:hover{opacity:.9;transform:translateY(-1px);}
+
+/* LOG */
+.log-box{background:#0a0c15;border:1px solid var(--border);border-radius:12px;padding:16px;font-family:monospace;font-size:.8rem;height:260px;overflow-y:auto;color:#94a3b8;}
+.log-box .ok{color:var(--green);}
+.log-box .err{color:var(--red);}
+.log-box .info{color:var(--accent2);}
+
+/* RESULT */
+.result-box{background:#0a0c15;border:1px solid var(--border);border-radius:12px;padding:16px;font-size:.8rem;margin-top:16px;display:none;}
+.result-box textarea{background:transparent;border:none;color:#94a3b8;height:200px;padding:0;font-family:monospace;}
+.download-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.82rem;cursor:pointer;text-decoration:none;margin-top:10px;transition:.2s;}
+.download-btn:hover{border-color:var(--accent);color:var(--accent2);}
+
+/* FILES */
+.file-list{margin-top:16px;}
+.file-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;font-size:.82rem;}
+.file-item .fname{color:var(--text);}
+.file-item .fsize{color:var(--muted);font-size:.75rem;}
+
+/* STEP BADGES */
+.steps{display:flex;gap:8px;margin-bottom:20px;}
+.step{flex:1;text-align:center;padding:10px 6px;border-radius:10px;background:var(--card2);border:1px solid var(--border);font-size:.75rem;color:var(--muted);}
+.step .num{display:block;font-size:1.1rem;font-weight:700;color:var(--accent2);margin-bottom:2px;}
+
+/* PAGE SECTIONS */
+.page{display:none;}.page.active{display:block;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📄</div>
+  <div>
+    <h1>DocAgent</h1>
+    <p>AI-Powered Project Documentation Generator</p>
+  </div>
+  <div class="status-dot" title="Ollama connected"></div>
+</header>
+
+<div style="padding:0 32px;">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">⚡ Agent 1 — Prompt Generator</div>
+    <div class="tab" onclick="switchTab(1)">📝 Agent 2 — Doc Formatter</div>
+    <div class="tab" onclick="switchTab(2)">📁 Generated Files</div>
+  </div>
+</div>
+
+<!-- ══════════════════ AGENT 1 TAB ══════════════════ -->
+<div id="tab0" class="page active">
+<div class="container">
+
+  <!-- LEFT: FORM -->
+  <div class="card">
+    <div class="card-title">📌 Project Details</div>
+
+    <div class="steps">
+      <div class="step"><span class="num">1</span>Fill Form</div>
+      <div class="step"><span class="num">2</span>Generate Prompt</div>
+      <div class="step"><span class="num">3</span>Paste in ChatGPT</div>
+      <div class="step"><span class="num">4</span>Run Agent 2</div>
+    </div>
+
+    <div class="form-group">
+      <label>Project Topic *</label>
+      <input id="a1-topic" type="text" placeholder="e.g. Online Blood Bank Management System"/>
+    </div>
+    <div class="form-group">
+      <label>Project Description <span style="color:var(--muted)">(optional but recommended)</span></label>
+      <textarea id="a1-desc" placeholder="Briefly describe what your project does, its key features, technologies used, and the problem it solves. The more detail you give, the better the generated prompt will be."></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label>Degree</label>
+        <select id="a1-degree">
+          <option value="BE">BE / B.Tech</option>
+          <option value="MCA">MCA</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>AI Model</label>
+        <select id="a1-model">
+          <option value="phi3">phi3 (Default)</option>
+          <option value="llama3">llama3</option>
+          <option value="mistral">mistral</option>
+          <option value="codellama">codellama</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Department</label>
+      <input id="a1-dept" type="text" placeholder="Information Technology" value="Information Technology"/>
+    </div>
+    <div class="form-group">
+      <label>College Name <span style="color:var(--muted)">(optional)</span></label>
+      <input id="a1-college" type="text" placeholder="e.g. XYZ Engineering College"/>
+    </div>
+    <div class="form-group">
+      <label>Guide Name <span style="color:var(--muted)">(optional)</span></label>
+      <input id="a1-guide" type="text" placeholder="e.g. Dr. S. Kumar"/>
+    </div>
+
+
+
+    <button class="btn btn-primary" id="a1-btn" onclick="runAgent1()">Generate Mega-Prompt</button>
+  </div>
+
+  <!-- RIGHT: LOG + RESULT -->
+  <div>
+    <div class="card">
+      <div class="card-title">📡 Live Output</div>
+      <div class="log-box" id="a1-log"><span class="info">Waiting to start...</span></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;" id="a1-result-card" style="display:none;">
+      <div class="card-title">✅ Generated Prompts</div>
+      <div id="a1-downloads"></div>
+      <p style="font-size:.78rem;color:var(--muted);margin-top:14px;">
+        👉 Open the downloaded .txt file → Copy everything → Paste into <strong>ChatGPT / Gemini / Claude</strong> → Save the AI response as <code>content.txt</code> → Use Agent 2 to format it into a .docx
+      </p>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════ AGENT 2 TAB ══════════════════ -->
+<div id="tab1" class="page">
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">📝 Document Details</div>
+
+    <div class="form-group">
+      <label>Content .txt File Path *</label>
+      <input id="a2-file" type="text" placeholder="e.g. content_part2.txt (relative to Agent folder)"/>
+    </div>
+    <div class="form-group">
+      <label>Project Title *</label>
+      <input id="a2-title" type="text" placeholder="Full project title for the title page"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label>Student Name</label>
+        <input id="a2-student" type="text" placeholder="Your Name"/>
+      </div>
+      <div class="form-group">
+        <label>Roll Number</label>
+        <input id="a2-roll" type="text" placeholder="e.g. 2K21CS001"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>College Name</label>
+      <input id="a2-college" type="text" placeholder="College Name"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label>Department</label>
+        <input id="a2-dept" type="text" placeholder="Information Technology"/>
+      </div>
+      <div class="form-group">
+        <label>AI Model</label>
+        <select id="a2-model">
+          <option value="phi3">phi3 (Default)</option>
+          <option value="llama3">llama3</option>
+          <option value="mistral">mistral</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label>Guide Name</label>
+        <input id="a2-guide" type="text" placeholder="Dr. Guide Name"/>
+      </div>
+      <div class="form-group">
+        <label>HOD Name</label>
+        <input id="a2-hod" type="text" placeholder="Dr. HOD Name"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Output Filename</label>
+      <input id="a2-out" type="text" placeholder="FinalProjectDoc.docx" value="FinalProjectDoc.docx"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label>Degree</label>
+        <input id="a2-degree" type="text" placeholder="B.Tech" value="B.Tech"/>
+      </div>
+      <div class="form-group">
+        <label>Submission Year</label>
+        <input id="a2-year" type="text" placeholder="MAY 2026" value="MAY 2026"/>
+      </div>
+    </div>
+
+    <button class="btn btn-green" id="a2-btn" onclick="runAgent2()">Format to .docx</button>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="card-title">📡 Live Output</div>
+      <div class="log-box" id="a2-log"><span class="info">Waiting to start...</span></div>
+    </div>
+    <div class="card" id="a2-result-card" style="margin-top:20px;display:none;">
+      <div class="card-title">✅ Document Ready</div>
+      <div id="a2-downloads"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════════════ FILES TAB ══════════════════ -->
+<div id="tab2" class="page">
+<div style="padding:28px 32px;max-width:900px;">
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between;">
+      📁 Generated Files
+      <button onclick="loadFiles()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:5px 14px;border-radius:8px;font-size:.78rem;cursor:pointer;">Refresh</button>
+    </div>
+    <div class="file-list" id="file-list"><span style="color:var(--muted);font-size:.85rem;">Click Refresh to load files...</span></div>
+  </div>
+</div>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.tab');
+const pages = document.querySelectorAll('.page');
+
+function switchTab(i) {
+  tabs.forEach((t,idx)=>t.classList.toggle('active',idx===i));
+  pages.forEach((p,idx)=>p.classList.toggle('active',idx===i));
+  if(i===2) loadFiles();
+}
+
+function uid(){ return Math.random().toString(36).substr(2,9); }
+
+function log(boxId, msg, cls=''){
+  const box = document.getElementById(boxId);
+  const line = document.createElement('div');
+  line.className = cls;
+  line.textContent = '> ' + msg;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+function clearLog(boxId){
+  document.getElementById(boxId).innerHTML = '';
+}
+
+// ── AGENT 1 ──────────────────────────────────────────
+async function runAgent1(){
+  const topic = document.getElementById('a1-topic').value.trim();
+  if(!topic){ alert('Please enter a project topic!'); return; }
+
+  const btn = document.getElementById('a1-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  clearLog('a1-log');
+  document.getElementById('a1-result-card').style.display = 'none';
+
+  const session = uid();
+  const payload = {
+    topic, session_id: session,
+    description: document.getElementById('a1-desc').value,
+    degree: document.getElementById('a1-degree').value,
+    dept: document.getElementById('a1-dept').value,
+    college: document.getElementById('a1-college').value,
+    guide: document.getElementById('a1-guide').value,
+    model: document.getElementById('a1-model').value,
+  };
+
+  const res = await fetch('/api/run-agent1', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){ log('a1-log','Failed to start agent','err'); btn.disabled=false; btn.textContent='Generate Mega-Prompt'; return; }
+
+  // Stream logs
+  const evtSource = new EventSource(`/api/stream/${session}`);
+  evtSource.onmessage = (e) => {
+    const msg = e.data;
+    if(msg.startsWith('RESULT:')){
+      evtSource.close();
+      btn.disabled=false;
+      btn.textContent='Generate Mega-Prompt';
+      const results = JSON.parse(msg.slice(7));
+      showAgent1Results(results);
+      log('a1-log','All done!','ok');
+    } else if(msg.startsWith('ERROR:')){
+      evtSource.close();
+      btn.disabled=false;
+      btn.textContent='Generate Mega-Prompt';
+      log('a1-log', msg.slice(6), 'err');
+    } else if(msg.startsWith('DONE:')){
+      log('a1-log', msg.slice(5), 'ok');
+    } else {
+      log('a1-log', msg, 'info');
+    }
+  };
+  evtSource.onerror = ()=>{ evtSource.close(); btn.disabled=false; btn.textContent='Generate Mega-Prompt'; };
+}
+
+function showAgent1Results(results){
+  const card = document.getElementById('a1-result-card');
+  const dl = document.getElementById('a1-downloads');
+  card.style.display = 'block';
+  dl.innerHTML = '';
+  results.forEach(r => {
+    dl.innerHTML += `
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:.82rem;color:var(--muted);margin-bottom:8px;">Part ${r.part} Prompt</div>
+        <textarea style="width:100%;background:transparent;border:none;color:#94a3b8;height:100px;font-family:monospace;font-size:.78rem;resize:none;outline:none;" readonly>${r.preview}...</textarea>
+        <a class="download-btn" href="/api/download/${encodeURIComponent(r.file)}">⬇ Download ${r.file}</a>
+      </div>`;
+  });
+}
+
+// ── AGENT 2 ──────────────────────────────────────────
+async function runAgent2(){
+  const file = document.getElementById('a2-file').value.trim();
+  const title = document.getElementById('a2-title').value.trim();
+  if(!file){ alert('Please enter the content file path!'); return; }
+  if(!title){ alert('Please enter the project title!'); return; }
+
+  const btn = document.getElementById('a2-btn');
+  btn.disabled = true; btn.textContent = 'Formatting...';
+  clearLog('a2-log');
+  document.getElementById('a2-result-card').style.display = 'none';
+
+  const session = uid();
+  const payload = {
+    content_file: file, title, session_id: session,
+    student: document.getElementById('a2-student').value,
+    roll: document.getElementById('a2-roll').value,
+    college: document.getElementById('a2-college').value,
+    dept: document.getElementById('a2-dept').value,
+    guide: document.getElementById('a2-guide').value,
+    hod: document.getElementById('a2-hod').value,
+    out_file: document.getElementById('a2-out').value,
+    degree: document.getElementById('a2-degree').value,
+    year: document.getElementById('a2-year').value,
+    model: document.getElementById('a2-model').value,
+  };
+
+  const res = await fetch('/api/run-agent2', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){ log('a2-log','Failed to start formatter','err'); btn.disabled=false; btn.textContent='Format to .docx'; return; }
+
+  const evtSource = new EventSource(`/api/stream/${session}`);
+  evtSource.onmessage = (e) => {
+    const msg = e.data;
+    if(msg.startsWith('RESULT:')){
+      evtSource.close();
+      btn.disabled=false; btn.textContent='Format to .docx';
+      const r = JSON.parse(msg.slice(7));
+      const card = document.getElementById('a2-result-card');
+      card.style.display='block';
+      document.getElementById('a2-downloads').innerHTML = `
+        <a class="download-btn" href="/api/download/${encodeURIComponent(r.file)}" style="font-size:.9rem;padding:12px 24px;">
+          ⬇ Download ${r.file}
+        </a>`;
+      log('a2-log','Document ready!','ok');
+    } else if(msg.startsWith('ERROR:')){
+      evtSource.close();
+      btn.disabled=false; btn.textContent='Format to .docx';
+      log('a2-log', msg.slice(6),'err');
+    } else {
+      log('a2-log', msg,'info');
+    }
+  };
+  evtSource.onerror = ()=>{ evtSource.close(); btn.disabled=false; btn.textContent='Format to .docx'; };
+}
+
+// ── FILES TAB ─────────────────────────────────────────
+async function loadFiles(){
+  const res = await fetch('/api/files');
+  const files = await res.json();
+  const list = document.getElementById('file-list');
+  if(!files.length){ list.innerHTML='<span style="color:var(--muted);font-size:.85rem;">No generated files yet.</span>'; return; }
+  list.innerHTML = files.map(f=>`
+    <div class="file-item">
+      <span class="fname">${f.name}</span>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="fsize">${(f.size/1024).toFixed(1)} KB</span>
+        <a href="/api/download/${encodeURIComponent(f.name)}" class="download-btn" style="margin:0;padding:5px 12px;">⬇</a>
+      </div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
