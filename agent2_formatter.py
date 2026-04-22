@@ -631,8 +631,7 @@ class DocumentFormatterAgentV2:
 
             # References
             elif btype == "references_start":
-                doc.add_page_break()
-                add_chapter_heading(doc, "REFERENCES")
+                add_subheading(doc, "REFERENCES")
                 in_references = True
 
             elif btype == "reference":
